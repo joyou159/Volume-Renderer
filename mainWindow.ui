@@ -17,7 +17,10 @@
    <string notr="true">background-color: #1b1d23;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="4,0,0">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="4,0,0" columnminimumwidth="0,0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMinimumSize</enum>
+    </property>
     <property name="leftMargin">
      <number>20</number>
     </property>
@@ -77,10 +80,10 @@ QPushButton:pressed {
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
-         <number>3</number>
+         <number>15</number>
         </property>
         <item>
-         <widget class="QRadioButton" name="surface_button">
+         <widget class="QRadioButton" name="SurfaceButton">
           <property name="styleSheet">
            <string notr="true">color:white;
 font-weight:bold;
@@ -96,7 +99,7 @@ font-size: 15px;
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="raycast_button">
+         <widget class="QRadioButton" name="RayCastButton">
           <property name="styleSheet">
            <string notr="true">color:white;
 font-weight:bold;
@@ -129,7 +132,7 @@ font-size: 15px;
          <number>20</number>
         </property>
         <item alignment="Qt::AlignHCenter">
-         <widget class="QSlider" name="IsoValue">
+         <widget class="QSlider" name="IsoValueSlider">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
@@ -139,7 +142,7 @@ font-size: 15px;
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="IsoValue">
           <property name="styleSheet">
            <string notr="true">color:white;
 font-weight:bold;
@@ -203,13 +206,6 @@ QPushButton:pressed {
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
-     <widget class="QOpenGLWidget" name="openGLWidget">
-      <property name="styleSheet">
-       <string notr="true">border: 3px solid rgb(17,17,17);</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="1">
      <widget class="Line" name="line_2">
       <property name="styleSheet">
@@ -221,6 +217,9 @@ border: none;</string>
        <enum>Qt::Vertical</enum>
       </property>
      </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QOpenGLWidget" name="render_area"/>
     </item>
    </layout>
   </widget>
