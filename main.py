@@ -14,18 +14,22 @@ class VTKMainWindow(QMainWindow):
         # Load the main window UI
         self.ui = loadUi('mainWindow.ui', self)
         self.resize(1200, 800)
+        # either (0--> surface rendering, 1--> ray-casting rendering)
         self.rendering_mode = None
 
-        # Set up the layout
+        # put the QOpenGLWidget in a vertical layout
         layout = QVBoxLayout(self.ui.render_area)
+        self.vtk_widget = self.create_vtk_widget()  # create a custom VTK widget
+        # add this widget to the vertical layout
+        layout.addWidget(self.vtk_widget)
+
         self.ui.Import_button.clicked.connect(self.browse)
         self.ui.clear_button.clicked.connect(self.clear_output)
 
-        self.vtk_widget = self.create_vtk_widget()
-        layout.addWidget(self.vtk_widget)
-
         self.volume_renderer = VolumeRenderer(self.vtk_widget, self)
+
         self.ui.IsoValue.setText(
+            # displaying the initial value of the iso Value (0)
             f"Iso Value: {self.volume_renderer.iso_value}")
 
         self.ui.SurfaceButton.toggled.connect(
@@ -33,30 +37,43 @@ class VTKMainWindow(QMainWindow):
         self.ui.RayCastButton.toggled.connect(
             self.handle_radio_button_toggled)
 
-        # Set default radio button states
         self.ui.SurfaceButton.setChecked(True)
-        # Initialize VolumeRenderer with the vtk_widget
 
     def create_vtk_widget(self):
+        """
+        Create and return a VTK (Visualization Toolkit) widget.
+
+        This function initializes a VTK widget using the QVTKRenderWindowInteractor class
+        and configures it for rendering. The widget is intended for use within a graphical
+        user interface (GUI) and assumes the existence of a parent widget named 'render_area'
+        (accessible through self.ui.render_area).
+
+        Returns:
+        QVTKRenderWindowInteractor: The configured VTK widget.
+
+        """
+
         vtk_widget = QVTKRenderWindowInteractor(self.ui.render_area)
-        vtk_widget.GetRenderWindow().Render()
         vtk_widget.Initialize()
         return vtk_widget
 
     def browse(self):
-
         folder_path = QFileDialog.getExistingDirectory(
             self, "Select DICOM Folder")
 
         if not self.has_dicom_files(folder_path):
             return
         else:
-            if self.volume_renderer.visualize_flag:
+            if self.volume_renderer.visualize_flag:  # there is an existing visualization
                 self.clear_output()
-            dicom_reader = self.load_dicom_series(folder_path)
+            dicom_reader = self.load_dicom_series(
+                folder_path)  # A VTK DICOM image reader
+
             if dicom_reader:
-                self.volume_renderer.volume = dicom_reader
+                self.volume_renderer.volume = dicom_reader  # the volume to be rendered
+                # compute all the possible iso-values that exists in the render
                 self.volume_renderer.compute_intensity_values()
+
                 if self.rendering_mode == 0:
                     # Surface Rendering
                     iso_value = self.volume_renderer.iso_value
@@ -84,18 +101,39 @@ class VTKMainWindow(QMainWindow):
         msg_box.exec()
 
     def load_dicom_series(self, directory):
+        """
+        Load a DICOM series from the specified directory using VTK.
+
+        Parameters:
+            directory (str): The path to the directory containing the DICOM series.
+
+        Returns:
+            vtk.vtkDICOMImageReader: A VTK DICOM image reader instance containing the
+            loaded DICOM series.
+        """
         reader = vtk.vtkDICOMImageReader()
         reader.SetDirectoryName(directory)
         reader.Update()
         return reader
 
     def has_dicom_files(self, directory):
+        """
+        Check if the specified directory contains DICOM files.
+
+        Parameters:
+            directory (str): The path to the directory to be checked.
+
+        Returns:
+            bool: True if DICOM files are found in the directory, False otherwise.
+
+        """
         if directory:
             dicom_files = [file for file in os.listdir(
                 directory) if file.lower().endswith('.dcm')]
             return bool(dicom_files)
         else:
-            self.show_error_message("DICOM files not found.")
+            self.show_error_message(
+                "DICOM files not found")
             return False
 
     def handle_radio_button_toggled(self):
@@ -117,8 +155,10 @@ class VTKMainWindow(QMainWindow):
         self.volume_renderer.update_visualization()
 
     def clear_output(self):
+        # overwrite the existing VolumeRenderer object
         self.volume_renderer = VolumeRenderer(self.vtk_widget, self)
-        self.ui.IsoValueSlider.setValue(0)
+        self.ui.IsoValueSlider.setValue(0)  # reset the slider value
+        # rendering the render window (refresh after clearing)
         self.volume_renderer.render_window.Render()
 
     def closeEvent(self, event):
