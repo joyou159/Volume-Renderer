@@ -51,13 +51,35 @@ class VolumeRenderer:
         return volume_actor
 
     def add_reference_axes(self):
-        axes = vtk.vtkAxesActor()
-        widget = vtk.vtkOrientationMarkerWidget()
-        widget.SetOutlineColor(0.9300, 0.5700, 0.1300)
-        widget.SetOrientationMarker(axes)
-        widget.SetInteractor(self.vtk_widget)
-        widget.SetViewport(0.0, 0.0, 0.2, 0.2)
-        widget.SetEnabled(1)
+        # Create a vtkCubeAxesActor2D
+        cube_axes = vtk.vtkCubeAxesActor2D()
+
+        # Get bounds from the vtkRenderWindow
+        bounds = self.render_window.GetRenderers(
+        ).GetFirstRenderer().ComputeVisiblePropBounds()
+        cube_axes.SetBounds(bounds)
+
+        cube_axes.SetCamera(self.renderer.GetActiveCamera())
+        cube_axes.SetLabelFormat("%6.4g")
+        cube_axes.SetFlyModeToOuterEdges()
+
+        # Create a vtkTextProperty for the cube axes labels
+        text_property = vtk.vtkTextProperty()
+        text_property.BoldOn()
+        text_property.ItalicOn()
+        text_property.ShadowOn()
+        text_property.SetFontSize(12)
+
+        # Set the text property for the axes labels
+        cube_axes.GetAxisLabelTextProperty().ShallowCopy(text_property)
+
+        # Set the line width for the entire axis text
+        cube_axes.GetAxisLabelTextProperty().SetFrameWidth(2)
+        cube_axes.GetAxisLabelTextProperty().SetFrameWidth(2)
+        cube_axes.GetAxisLabelTextProperty().SetFrameWidth(2)
+
+        # Add the cube axes to the renderer
+        self.renderer.AddViewProp(cube_axes)
 
     def ray_casting_rendering(self, volume):
 
@@ -115,6 +137,7 @@ class VolumeRenderer:
             self.camera.SetFocalPoint(current_focal_point)
             self.camera.SetDistance(current_zoom)
             self.render_window.Render()
+            self.visualize_flag = 1
 
     def handle_iso_value(self):
         self.iso_value = self.main_window.ui.IsoValueSlider.value()
@@ -148,3 +171,4 @@ class VolumeRenderer:
         self.renderer.SetBackground(0, 0, 0)
         self.renderer.ResetCamera()
         self.add_reference_axes()
+        self.visualize_flag = 1

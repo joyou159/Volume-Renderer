@@ -5,7 +5,6 @@ import vtk
 import os
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from VolumeRenderer import VolumeRenderer
-import copy
 
 
 class VTKMainWindow(QMainWindow):
@@ -45,15 +44,15 @@ class VTKMainWindow(QMainWindow):
         return vtk_widget
 
     def browse(self):
-        if self.volume_renderer.visualize_flag:
-            self.clear_output()
+
         folder_path = QFileDialog.getExistingDirectory(
             self, "Select DICOM Folder")
 
         if not self.has_dicom_files(folder_path):
-            self.show_error_message("DICOM files not found.")
             return
         else:
+            if self.volume_renderer.visualize_flag:
+                self.clear_output()
             dicom_reader = self.load_dicom_series(folder_path)
             if dicom_reader:
                 self.volume_renderer.volume = dicom_reader
@@ -96,6 +95,7 @@ class VTKMainWindow(QMainWindow):
                 directory) if file.lower().endswith('.dcm')]
             return bool(dicom_files)
         else:
+            self.show_error_message("DICOM files not found.")
             return False
 
     def handle_radio_button_toggled(self):
