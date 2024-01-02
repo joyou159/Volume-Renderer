@@ -1,5 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog, QWidget, QMessageBox
+from PyQt5.QtGui import QIcon
 from PyQt5.uic import loadUi
 import vtk
 import os
@@ -13,6 +14,8 @@ class VTKMainWindow(QMainWindow):
 
         # Load the main window UI
         self.ui = loadUi('mainWindow.ui', self)
+        self.setWindowTitle("Volume Renderer")
+        self.setWindowIcon(QIcon("Icons/brain-imaging.png"))
         self.resize(1200, 800)
         # either (0--> surface rendering, 1--> ray-casting rendering)
         self.rendering_mode = None
