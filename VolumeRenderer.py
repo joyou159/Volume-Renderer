@@ -46,7 +46,9 @@ class VolumeRenderer:
         in setting up sliders for iso-surface extraction thresholds.
 
        """
-        scalar_range = self.volume.GetOutput().GetScalarRange()
+        smoothed_volume = self.apply_gaussian_smoothing(
+            self.volume.GetOutput())
+        scalar_range = smoothed_volume.GetScalarRange()
         self.intensity_values = list(
             range(int(scalar_range[0]), int(scalar_range[1]) + 1))
         self.set_iso_sliders()
@@ -205,6 +207,12 @@ class VolumeRenderer:
         self.main_window.ui.IsoValueSlider.setValue(
             self.intensity_values[len(self.intensity_values)//2])
 
+    def calculate_contour_number(self, iso_value):
+        # Determine the number of contours based on the iso-value and intensity range
+        num_contours = len(
+            [value for value in self.intensity_values if value <= iso_value])
+        return num_contours
+
     def surface_rendering(self, volume, iso_value):
         # apply gaussian filter, helps to reduce noise and artifacts in the data,
         # leading to a smoother and more visually appealing surface when rendering.
@@ -215,8 +223,9 @@ class VolumeRenderer:
         contour_filter.SetInputData(smoothed_volume)
         # (number of contours, maximum contour value , minimum contour value)
 
+        # can't control the number of contours as it case a crash
         contour_filter.GenerateValues(
-            5, self.iso_value, self.intensity_values[0])
+            5, iso_value, self.intensity_values[0])
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInputConnection(contour_filter.GetOutputPort())
 
