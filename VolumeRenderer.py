@@ -5,6 +5,7 @@ from PyQt5.uic import loadUi
 import vtk
 import os
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import numpy as np
 
 
 class VolumeRenderer:
@@ -213,8 +214,9 @@ class VolumeRenderer:
         contour_filter = vtk.vtkContourFilter()
         contour_filter.SetInputData(smoothed_volume)
         # (number of contours, maximum contour value , minimum contour value)
-        contour_filter.GenerateValues(1, iso_value, iso_value)
 
+        contour_filter.GenerateValues(
+            5, self.iso_value, self.intensity_values[0])
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInputConnection(contour_filter.GetOutputPort())
 
